@@ -1,34 +1,56 @@
-import React, { Component } from "react";
+import React, { Component, useEffect, useState } from "react";
 import ReactDOM from "react-dom";
-import Section from "./Section";
-
+import {Planet} from 'react-kawaii';
+import axios from 'axios';
 import "./styles.css";
+import Quadrant from "./Quadrant";
 
 const apiKey = process.env.REACT_APP_API_KEY;
 const searchTerm = "art";
 const fetchUrl = `https://api.giphy.com/v1/gifs/search?q=${searchTerm}&limit=50&api_key=${apiKey}`;
 
-class ArtApi extends Component {
-	state = {
-		apiData: [],
-	};
 
-	componentDidMount() {
-		fetch(fetchUrl)
-			.then((res) => res.json())
-			.then((json) => this.setState({ apiData: json.data }));
+const ArtApi = () => {
+	const [firstAPI, setFirstAPI] = useState(null);
+	const [secondAPI, setSecondAPI] = useState(null);
+
+	const fetchFirstAPI = async() =>{
+		const response = await axios.get('https://aws.random.cat/meow')
+		setFirstAPI(response.data.file)
+	}
+	const fetchSecondAPI = async() =>{
+		const response = await axios.get('https://randomfox.ca/floof/')
+		setSecondAPI(response.data.image)
 	}
 
-	render() {
-		return (
-			<div className="main">
-				<Section apiData={this.state.apiData} />
-				<Section apiData={this.state.apiData} />
-				<Section apiData={this.state.apiData} />
-				<Section apiData={this.state.apiData} />
-			</div>
-		);
+	useEffect(()=>{
+		fetchSecondAPI()
+		fetchFirstAPI()
+	},[])
+
+	const clickHandler = () =>{
+		setFirstAPI(null);
+		setSecondAPI(null);
+		fetchSecondAPI();
+		fetchFirstAPI();
 	}
+
+
+	return (
+		<div className="main">
+			<Quadrant image={firstAPI}/>
+			<Quadrant image={secondAPI}/>
+
+			<section className="section">
+				<Planet size={200} mood={(firstAPI && secondAPI) ? "blissful":"sad"} color="#FDA7DC" />
+			</section>
+			<section className="section">
+				<button onClick={clickHandler}>
+					Click me
+				</button>
+			</section>
+		</div>
+	);
 }
 
 export default ArtApi;
